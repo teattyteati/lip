@@ -33,3 +33,6 @@ let%test "zero_one_same_1" = derive same_amount [ 4 ] |> to_string = ""
 let%test "zero_one_same_2" = derive same_amount [ 0; 3; 1; 2; 4 ] |> to_string = "1001"
 let%test "zero_one_same_3" = derive same_amount [ 1; 2; 1; 2; 1; 3; 1; 3; 4 ] |> to_string = "00110101"
 let%test "zero_one_same_4" = derive same_amount [ 0; 2; 1; 3; 1; 3; 1; 3; 4 ] |> to_string = "10001110"
+
+(* fatto da me *)
+let%test "zero_one_same_5" = derive same_amount [ 5;7;0;3;4 ] |> to_string = "0110" (* per produrre questa parola e "1001" servono 3 symbols *)

@@ -77,7 +77,7 @@ let balanced_parentheses : grammar = {
    one greater than the number of 1's and viceversa, then combine them.
 *)
 let same_amount : grammar = {
-  symbols = [ A; B ];
+  symbols = [ A; B; S ];
   terminals = [ '0'; '1' ];
   productions =
     [              (* Indexes *)
@@ -86,6 +86,10 @@ let same_amount : grammar = {
       B --> "A0"; (*2*)
       B --> "0A"; (*3*)
       A --> "";   (*4*)
+      A --> "0S"; (*5*)
+      A --> "S0"; (*6*)
+      S --> "1A"; (*7*)
+      S --> "A1"; (*8*)
     ];
   start = A;
 }
