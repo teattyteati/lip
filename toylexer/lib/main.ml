@@ -36,6 +36,29 @@ let frequency num tokens =
 
   let uniq_list = List.sort_uniq compare tokens in
 
+
   List.map (fun current -> count current tokens) uniq_list
 ;;
 (* frequency 3 [ID("x"); ASSIGN; ID("y"); SEQ; ID("x"); ASSIGN; ID("x"); PLUS; CONST("1")];; *)
+
+
+
+
+
+
+(*contiamo le occurrences di elementi di una lista*)
+
+let lista = [1;2;3;1;2;5];;
+
+(*prima creiamo una lista con gli elementi da cercare*)
+
+let uniq_elements = List.sort_uniq compare lista;;
+
+
+let mapper uniq_element =
+  let conta n elemento = if elemento = uniq_element then (n+1) else n in
+
+  List.fold_left conta 0 lista;;
+(*contiamo gli elementi*)
+List.map mapper uniq_elements;;
+
