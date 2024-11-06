@@ -23,5 +23,19 @@ let string_of_tokenlist tl =
 let string_of_frequencies fl =
   List.fold_left (fun s (t,n) -> s ^ ((string_of_token t) ^ " -> " ^ string_of_int n ^ "\n")) "" fl
 
+
+let count current list =
+
+  let counter i el = if el = current then i + 1 else i in
+
+  List.fold_left counter 0 list
+;;
+
 (* frequency : int -> 'a list -> ('a * int) list *)
-let frequency _ _ = failwith("TODO")
+let frequency num tokens =
+
+  let uniq_list = List.sort_uniq compare tokens in
+
+  List.map (fun current -> count current tokens) uniq_list
+;;
+(* frequency 3 [ID("x"); ASSIGN; ID("y"); SEQ; ID("x"); ASSIGN; ID("x"); PLUS; CONST("1")];; *)
