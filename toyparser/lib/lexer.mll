@@ -10,6 +10,9 @@ rule read_token =
   | white { read_token lexbuf }  
   | "(" { LPAREN }
   | ")" { RPAREN }
+  | "*" { MUL }
+  | "/" { DIV }
   | "+" { PLUS }
+  | "-" { SUB }
   | num { CONST (Lexing.lexeme lexbuf) }
   | eof { EOF }
