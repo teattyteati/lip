@@ -42,9 +42,12 @@ The main utility function in the `Toyparser` library is:
 ```ocaml
 eval : ast -> result
 ````
-This function takes as input an abstract syntax tree,
-and outputs its integer value.
-For instance:
+This function takes as input an abstract syntax tree, and outputs its value.
+In order to handle possible evaluation errors, the return type `int_or_err` is a tagged union:
+the tag `Ok` wraps correct evaluation results (of type `int`), while
+the tag `Error` wraps error messages (of type `string`). 
+
+An example of a correct evaluation is the following:
 ```ocaml
 eval (Add (Add (Const 1,  Const 2), Const 3))
 > Ok 6
@@ -98,7 +101,20 @@ Add(Add (Const 1, Const 2), Const 3)
 
 The section of [parser.mly](/lib/parser.mly) between the the token declarations and the grammar rules is dedicated to associativity and priority declarations.
 
-An associativity declaration is written in a single line and it has the form `%left <TOKEN>` or `%right <TOKEN>`.
+An associativity declaration is written in a single line and it accepts a non-empty list of tokens. It can take on one of the following forms:
+```
+%left TOKEN_1 TOKEN_2 ...
+```
+
+```
+%right TOKEN_1 TOKEN_2 ...
+```
+
+```
+%nonassoc TOKEN_1 TOKEN_2 ...
+```
+
+where `TOKEN_1`, `TOKEN_2` etc. are tokens defined in a previous `%token` declaration.
 
 A line starting with `%left` defines a left-associative group of tokens or productions, while `%right` defines a right-associative group. There's also `%nonassoc`, which defines a group that is not associative.
 
@@ -114,9 +130,64 @@ In the example above, the token `OR` has lower priority than both `AND` and `NOT
 
 Behind the scenes, the parse tables are constructed so that `OR` cannot appear as a direct child of `AND` in the AST of any given expression without parentheses, and therefore the parser will always try to reduce `AND` first.
 
-## Evaluating results
+## Task 3
+
+Extend the lexer, the parser and the evaluation function
+to handle also multiplication and division.
+
+Revise the evaluation function to report an error when attempting to divide by zero.
+The result of `eval e` must be `Result.Error msg` if the evaluation involves a division by zero. The error message must mention the value of the dividend, as in the following output:
+
+```sh
+echo "1 + 2 / 0" | dune exec toyparser
+> Error: tried to divide 2 by zero
+```
+Implement unit tests in the `test` directory.
+
+## Task 4
+
+Extend the lexer, the parser and the evaluation function
+to handle also the unary minus.
+For instance:
+```bash
+echo "-1 - 2 - -3" | dune exec toyparser
+> 0
+```
+Implement unit tests in the `test` directory.
+
+## Task 5
+
+Extend the lexer, the parser and the evaluation function
+to handle also hexadecimal numbers in C syntax.
+For instance:
+```bash
+echo "0x01 + 2" | dune exec toyparser
+> 3
+```
+Implement unit tests in the `test` directory.
+
+## Task 6 (optional)
+
+Refactor the code of `eval` using the `==>` operator defined in [lib/main.ml](/lib/main.ml):
+
+```ocaml
+let ( ==> ) (res : int_or_err) (f : int -> int_or_err) : int_or_err =
+  match res with
+  | Ok value -> f value
+  | Error msg -> Error msg
+```
+
+Read on to understand what it does and how to use it. An example refactoring with `==>` is provided at the end.
+
+### Background: Evaluating results
 
 Let's have a closer look at the type of the evaluator: 
+```ocaml
+eval : ast -> int_or_err
+```
+Both `ast` and `int_or_err` are custom types defined in [lib/ast.ml](lib/ast.ml) and [lib/main.ml](lib/main.ml), respectively. In particular, `int_or_err` is an instance of a more general type called *result*.
+
+A **result** is a tagged union of two constructors, `Ok` and `Error`, parameterized on two type variables `'a`  (pronounced "alpha") and `'error`. `Ok` carries values of type `'a` and `Error` carries values of type `'error`:
 
 ```ocaml
 eval : ast -> result
@@ -161,7 +232,21 @@ let ( ==> ) res f =
   | Error msg -> Error msg
 ```
 
-The thick arrow operator helps us make the code of the evaluator a lot more succinct and readable. The case for `Add`, for example, simplifies to:
+This operator is also available in the `Result` module of the standard library under the name `Result.bind`. Our custom definition in [lib/main.ml](/lib/main.ml) lets us use it as an infix operator.
+
+The thick arrow operator helps us make the code of the evaluator a lot more succinct and readable. For example, consider the code provided by the project for `eval` that handles addition:
+
+```ocaml
+| Add (e1,e2) ->
+  let res1 = eval e1 in
+  let res2 = eval e2 in
+  match res1, res2 with
+  | Error err1, _ -> Error err1
+  | _, Error err2 -> Error err2
+  | Ok v1, Ok v2 -> Ok (v1 + v2)
+```
+
+Using `==>`, the code simplifies to:
 
 ```ocaml
 | Add (e1,e2) ->
@@ -172,39 +257,4 @@ The thick arrow operator helps us make the code of the evaluator a lot more succ
 
 This pattern has an additional benefit in that it is short-circuiting: if one of the expressions being evaluated fails with `Error _` then this is the result of the whole `Add` case; execution won't continue on evaluating the other expression.
 
-## Task 2
-
-Extend the lexer, the parser and the evaluation function
-to handle also multiplication and division.
-
-Revise the evaluation function to report an error when attempting to divide by zero.
-The result of `eval e` must be `Result.Error msg` if the evaluation involves a division by zero. The error message must mention the value of the dividend, as in the following output:
-
-```sh
-echo "1 + 2 / 0" | dune exec toyparser
-> Error: tried to divide 2 by zero
-```
-
-## Task 3
-
-Extend the lexer, the parser and the evaluation function
-to handle also the unary minus.
-For instance:
-```bash
-echo "-1 - 2 - -3" | dune exec toyparser
-> 0
-```
-
-## Task 4
-
-Extend the lexer, the parser and the evaluation function
-to handle also hexadecimal numbers in C syntax.
-For instance:
-```bash
-echo "0x01 + 2" | dune exec toyparser
-> 3
-```
-
-## Task 5
-
-Implement unit tests in the `test` directory.
+Your job in this task is to rewrite the code you wrote that handles subtraction, multiplication and division using the `==>` operator following the example above.
