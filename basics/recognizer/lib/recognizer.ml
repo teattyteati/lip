@@ -2,7 +2,7 @@ let rec lang1 w n = match w with
   [] -> false
 | ['0'] -> true
 | ['1'] -> true
-| h::w -> if h = '0' then lang1 w n else if h = '1' then lang1 w n else false;;
+| h::w -> if h = '0' || h = '1' then lang1 w n else false;;
 
 let rec lang2 w n = match w with
     [] -> true
