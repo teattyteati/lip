@@ -23,42 +23,27 @@ let string_of_tokenlist tl =
 let string_of_frequencies fl =
   List.fold_left (fun s (t,n) -> s ^ ((string_of_token t) ^ " -> " ^ string_of_int n ^ "\n")) "" fl
 
+let contatore current acc el = if current = el then acc+1 else acc;;
 
-let count current list =
+let c_occorr list current =
+  List.fold_left (contatore current) 0 list;;
 
-  let counter i el = if el = current then i + 1 else i in
+let unisci_liste e1 e2 = (e1, e2);;
 
-  List.fold_left counter 0 list
+let trim_condition num_to_take current _ = current < num_to_take;;
+
+let condizione a b = match a with
+(_, freq) -> match b with
+              (_, freq2) -> compare freq2 freq
 ;;
-
 (* frequency : int -> 'a list -> ('a * int) list *)
-let frequency num tokens =
+let frequency n list = 
+  let uniq_list = List.sort_uniq compare list in
+  
+  let count_list = List.map (c_occorr list) uniq_list in
 
-  let uniq_list = List.sort_uniq compare tokens in
+  let frequency_list = List.map2 unisci_liste uniq_list count_list in
 
+  let sorted_freq_list = List.sort condizione frequency_list in
 
-  List.map (fun current -> count current tokens) uniq_list
-;;
-(* frequency 3 [ID("x"); ASSIGN; ID("y"); SEQ; ID("x"); ASSIGN; ID("x"); PLUS; CONST("1")];; *)
-
-
-
-
-
-
-(*contiamo le occurrences di elementi di una lista*)
-
-let lista = [1;2;3;1;2;5];;
-
-(*prima creiamo una lista con gli elementi da cercare*)
-
-let uniq_elements = List.sort_uniq compare lista;;
-
-
-let mapper uniq_element =
-  let conta n elemento = if elemento = uniq_element then (n+1) else n in
-
-  List.fold_left conta 0 lista;;
-(*contiamo gli elementi*)
-List.map mapper uniq_elements;;
-
+  List.filteri (trim_condition n) sorted_freq_list;;
