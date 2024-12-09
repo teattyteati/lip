@@ -20,13 +20,15 @@ let string_of_result : result -> string = function
 
 (* eval : ast -> result *)
 
-let rec eval : ast -> bool -> result = function
+let rec eval (flag : bool) (ast : ast) : result =
+  match ast, flag with
 
-  | Const n -> Ok n
+  | Const n, _ -> Ok n
+  (*| Const n, true -> if n = 0 then Error ("Error: tried to divide "^string_of_int n^" by zero") else Ok n*)
   
-  | Add (e1,e2) ->
-    let res1 = eval e1 false in
-    let res2 = eval e2 false in
+  | Add (e1,e2), _ ->
+    let res1 = eval false e1 in
+    let res2 = eval false e2 in
     begin 
     match res1, res2 with
     | Error err1, _ -> Error err1
@@ -34,9 +36,9 @@ let rec eval : ast -> bool -> result = function
     | Ok v1, Ok v2 -> Ok (v1 + v2)
     end
     
-  | Sub (e1,e2) ->
-    let res1 = eval e1 false in
-    let res2 = eval e2 false in
+  | Sub (e1,e2), _ ->
+    let res1 = eval false e1 in
+    let res2 = eval false e2 in
     begin
     match res1, res2 with
     | Error err1, _ -> Error err1
@@ -44,9 +46,9 @@ let rec eval : ast -> bool -> result = function
     | Ok v1, Ok v2 -> Ok (v1 - v2)
     end
 
-  | Mul (e1,e2) ->
-    let res1 = eval e1 false in
-    let res2 = eval e2 false in
+  | Mul (e1,e2), _ ->
+    let res1 = eval false e1 in
+    let res2 = eval false e2 in
     begin
     match res1, res2 with
     | Error err1, _ -> Error err1
@@ -54,12 +56,11 @@ let rec eval : ast -> bool -> result = function
     | Ok v1, Ok v2 -> Ok (v1 * v2)
     end
 
-  | Div (e1,e2) ->
-    let res1 = eval e1 false in
-    let res2 = eval e2 false in
+  | Div (e1,e2), _ ->
+    let res1 = eval false e1 in
+    let res2 = eval true e2 in
     begin
     match res1, res2 with
     | Error err1, _ -> Error err1
     | _, Error err2 -> Error err2
-    | Ok v1, Ok v2 -> Ok (v1 / v2)
-    end
+    | Ok v1, Ok v2 -> if(v2=0) then Error ("Error: tried to divide "^ string_of_int v1 ^" by zero") else Ok (v1 / v2) end
