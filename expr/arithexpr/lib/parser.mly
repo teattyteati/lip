@@ -7,6 +7,7 @@ open Ast
 %token LPAREN
 %token RPAREN
 %token IF
+%token NOT
 %token THEN
 %token ELSE
 %token EOF
@@ -16,6 +17,12 @@ open Ast
 %token SUCC
 %token PRED
 %token ISZERO
+
+
+
+
+%left OR AND PRED SUCC
+%right NOT ISZERO
 
 %start <expr> prog
 
@@ -36,4 +43,5 @@ expr:
   | SUCC; e1 = expr; { Succ (e1) }
   | PRED; e1 = expr; { Pred (e1) }
   | ISZERO; e1 = expr; { IsZero (e1) }
+  | NOT; e1 = expr; { Not (e1) }
 ;

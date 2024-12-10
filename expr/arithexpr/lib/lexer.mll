@@ -17,6 +17,7 @@ rule read =
   | "or" { OR }
   | "and" { AND }
   | "iszero" { ISZERO }
+  | "not" { NOT }
   | "0" { ZERO }
   | "succ" { SUCC }
   | "pred" { PRED }

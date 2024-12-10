@@ -17,7 +17,7 @@ open Ast
 %left OR
 %left AND
 
-%right NOT
+%right NOT PRED SUCC
 
 %start <boolExpr> prog
 
@@ -35,4 +35,6 @@ expr:
   | e1 = expr; OR; e2 = expr; { Or (e1, e2) }
   | LPAREN; e = expr; RPAREN {e}
   | NOT; e = expr; { Not (e) }
+  | PRED; e = expr; { Pred (e) }
+  | SUCC; e = expr; { Succ (e) }
 ;
