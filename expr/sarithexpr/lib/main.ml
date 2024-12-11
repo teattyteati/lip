@@ -59,16 +59,11 @@ let rec trace1 = function
   | And(True,True) -> True
   | And(_,False)
   | And(False,_) -> False  
-  | And (e0, True) -> And (trace1 e0, True) 
-  | And (True, e0) -> And (True, trace1 e0) 
   | And(e0,e1) -> And(trace1 e0,e1)
 
   | Or(True,_) 
   | Or(_,True) -> True
   | Or(False,False) -> False
-  | Or(e0, False) -> Or (trace1 e0, False)
-  | Or(False, e0) -> Or (False, trace1 e0)
-  
   | Or(e0,e1) -> Or(trace1 e0,e1)
 
   | Succ e -> Succ (trace1 e)
