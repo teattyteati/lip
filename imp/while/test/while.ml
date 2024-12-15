@@ -1,6 +1,6 @@
 open WhileLib.Ast
 open WhileLib.Types
-open WhileLib.Prettyprint       
+open WhileLib.Prettyprint  
 open WhileLib.Main
 
 (**********************************************************************
@@ -14,7 +14,7 @@ let%test "test_parse1" = test_parse
     "x:=0" (Assign("x",Const(0)))
 
 let%test "test_parse2" = test_parse
-    "x:=0; y:=x+1" (Seq(Assign("x",Const(0)),Assign("y",Add(Var("x"),Const(1)))))    
+    "x:=0; y:=x+1" (Seq(Assign("x",Const(0)),Assign("y",Add(Var("x"),Const(1)))))     
 
 let%test "test_parse3" = test_parse
     "x:=0; if x=0 then y:=1 else y:=0" (Seq(Assign("x",Const(0)),If(Eq(Var("x"),Const(0)),Assign("y",Const(1)),Assign("y",Const(0)))))

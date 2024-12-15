@@ -1,0 +1,7 @@
+{
+    "powermode.enabled": false,
+    "powermode.presets": "flames",
+    "powermode.combo.location": "editor",
+    "powermode.shake.enabled": false,
+    "powermode.combo.threshold": 50
+}
