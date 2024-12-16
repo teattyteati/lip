@@ -2,7 +2,7 @@
     open Parser
 }
 
-let white = [' ' '\t']+
+let white = [' ' '\t''\n''\r']+
 let const = ['0'-'9']*
 let var = ['a'-'z''A'-'Z''_']*
 
