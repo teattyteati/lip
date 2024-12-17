@@ -77,7 +77,7 @@ let%test "test_trace10" = test_trace
     ("{ int x; x:=2; { int x; x:=100 }; { x:=x+1 } }", 10, 0, Int 3)
 
 let%test "test_trace11" = test_trace
-    ("{ int y; int x; x:=10; { int x; x:=20; y:=x }; y:=x }", 10, 0, Int 10)
+    ("{ int y; int x; x:=10; { int x; x:=20; y:=x }; { y:=x } }", 10, 0, Int 10)
 
 let%test "test_trace12" = test_trace
     ("{ int y; int x; x:=10; { int x; x:=20; y:=x } }", 10, 0, Int 20)

@@ -30,6 +30,8 @@ rule read =
     | "else" { ELSE }
     | "while" { WHILE }
     | "do" { DO }
+    | "{" { LBRACE }
+    | "}" { RBRACE }
     |";" { SEQ }
     | var { VAR (Lexing.lexeme lexbuf) }
     | const { CONST (int_of_string (Lexing.lexeme lexbuf)) }

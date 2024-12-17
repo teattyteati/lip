@@ -65,22 +65,23 @@ let rec eval_expr (st:state) (ex:expr) : memval = match ex with
   )
 
 (* eval_decl : state -> decl list -> state *)
+
+(* mette troppi stati uno sull'altro  *)
 let rec eval_decl (st:state) (decl_list:decl list) : state =
   match decl_list with
-    h::l -> match h with
-              IntVar(x) -> let curr_loc = getloc st in
-                           let curr_env = topenv st in 
-                           let new_env = fun (i:ide) -> if i = x then curr_loc else curr_env i in
-                          bind_env new_env x curr_loc in
-                          setenv st (curr_env @ getenv) in
-                          setloc st (curr_loc+1)
-            | BoolVar(x)
+    h::l -> (match h with 
+                IntVar(x) -> eval_decl (make_state ((bind_env (topenv st) x ((IVar(getloc st))) :: getenv st)) (getmem st) ((getloc st)+1)) l
+              | BoolVar(x) -> eval_decl (make_state ((bind_env (topenv st) x ((IVar((getloc st)))) :: getenv st)) (getmem st) ((getloc st)+1)) l
+              )
+  | [] -> st
 
 (* trace1 : conf -> conf *)
 let rec trace1 (c : conf) : conf = match c with 
   St st -> St st
 | Cmd (Skip, st) -> St st
-| Cmd (Assign(x,y), st) -> St (bind st x (eval_expr st y))
+| Cmd (Assign(x,y), st) -> (match (topenv st) x with
+                            BVar(v) -> St (make_state (getenv st) (bind_mem (getmem st) (v) (eval_expr st y)) (getloc st))
+                          | IVar(v) -> St (make_state (getenv st) (bind_mem (getmem st) (v) (eval_expr st y)) (getloc st)))
 | Cmd (Seq(x,y), st) -> (match trace1 (Cmd(x, st)) with
     St st -> (Cmd (y, st))
   | Cmd(x', st) -> (Cmd(Seq(x', y), st))
@@ -89,15 +90,22 @@ let rec trace1 (c : conf) : conf = match c with
 | Cmd(If (a,b,c), st) -> (match (eval_expr st a) with
     Bool true -> (Cmd(b, st))
   | Bool false -> (Cmd(c, st))
-  | Nat _ -> failwith "problem?")
+  | _ -> failwith "problem?")
 
 | Cmd(While(a, b), st) -> (match (eval_expr st a) with
     Bool true -> (Cmd(Seq(b, While(a, b)), st))
   | Bool false -> St st
-  | Nat _ -> failwith "problem?")
+  | _ -> failwith "problem?")
+
+| Cmd(Decl(l,b), st) -> Cmd(Block(b), (eval_decl st l))
+| Cmd(Block(b), st) -> (match (trace1 (Cmd(b, st))) with
+                         St st -> St (make_state (popenv st) (getmem st) (getloc st))
+                       | Cmd(b', st') -> Cmd(b', st')
+                       )
+
 
 (* bottom : state *)
-let (bottom:state) = fun _ -> raise (UnboundVar "Variabile non trovata.")
+(* let (bottom:state) = fun _ -> raise (UnboundVar "Variabile non trovata.") *)
 let (confl: conf list) = []
 
 
@@ -109,5 +117,5 @@ let rec helper (i:int) (c:conf) : conf list =
     
 
 
-(* trace : int -> cmd -> conf list *)
-let trace (i:int) (c:cmd) : conf list = helper i (Cmd(c, bottom))
+(* trace : int -> cmd -> conf list) *)
+let trace (i:int) (c:cmd) : conf list = helper i (Cmd(c, state0))

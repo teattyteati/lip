@@ -27,6 +27,8 @@ open Ast
 %token LPAREN
 %token INT
 %token BOOL
+%token LBRACE
+%token RBRACE
 
 
 %left SEQ OR MUL SUB ADD AND
@@ -58,8 +60,8 @@ expr:
 ;
 
 decl:
-  | INT; e = VAR {IntVar(e)}
-  | BOOL; e = VAR {BoolVar(e)}
+  | INT; e = VAR; SEQ {IntVar(e)}
+  | BOOL; e = VAR; SEQ {BoolVar(e)}
 
 cmd:
   | IF; e1 = expr; THEN; c1 = cmd; ELSE; c2 = cmd; { If(e1, c1, c2) }
@@ -70,4 +72,6 @@ cmd:
   | e1 = VAR; ASSIGN; e2 = expr { Assign (e1, e2) }
   | WHILE; e = expr; DO; c = cmd { While (e, c) }
   | WHILE; e = expr; DO; LPAREN; c = cmd; RPAREN { While(e,c) }
-  | d1 = list (decl); SEQ c = cmd { Decl(d1, c) }
+  | LBRACE; l=list(decl); c=cmd; RBRACE { Decl(l, c) }
+
+  (*| l = list (decl); c = cmd { Decl(l, c) }*)
