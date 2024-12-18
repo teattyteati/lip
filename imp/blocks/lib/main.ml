@@ -67,18 +67,22 @@ let rec eval_expr (st:state) (ex:expr) : memval = match ex with
 (* eval_decl : state -> decl list -> state *)
 
 (* mette troppi stati uno sull'altro  *)
-let rec eval_decl (st:state) (decl_list:decl list) : state =
+
+let rec help_decl (env:env) (loc:loc) (decl_list:decl list) : (env*loc) =
   match decl_list with
     h::l -> (match h with 
-                IntVar(x) -> eval_decl (make_state ((bind_env (topenv st) x ((IVar(getloc st))) :: getenv st)) (getmem st) ((getloc st)+1)) l
-              | BoolVar(x) -> eval_decl (make_state ((bind_env (topenv st) x ((IVar((getloc st)))) :: getenv st)) (getmem st) ((getloc st)+1)) l
+                IntVar(x) -> help_decl (bind_env (env) (x) (IVar((loc)))) (loc+1) l
+              | BoolVar(x) -> help_decl (bind_env (env) (x) (BVar((loc)))) (loc+1) l
               )
-  | [] -> st
+  | [] -> (env, loc)
+let eval_decl (st:state) (decl_list:decl list) : state =
+  match help_decl (topenv st) (getloc st) decl_list with
+   (env, loc) -> make_state (env :: getenv st) (getmem st) (loc)
+  
 
 (* trace1 : conf -> conf *)
 let rec trace1 (c : conf) : conf = match c with 
-  St st -> St st
-| Cmd (Skip, st) -> St st
+  Cmd (Skip, st) -> St st
 | Cmd (Assign(x,y), st) -> (match (topenv st) x with
                             BVar(v) -> St (make_state (getenv st) (bind_mem (getmem st) (v) (eval_expr st y)) (getloc st))
                           | IVar(v) -> St (make_state (getenv st) (bind_mem (getmem st) (v) (eval_expr st y)) (getloc st)))
@@ -100,13 +104,14 @@ let rec trace1 (c : conf) : conf = match c with
 | Cmd(Decl(l,b), st) -> Cmd(Block(b), (eval_decl st l))
 | Cmd(Block(b), st) -> (match (trace1 (Cmd(b, st))) with
                          St st -> St (make_state (popenv st) (getmem st) (getloc st))
-                       | Cmd(b', st') -> Cmd(b', st')
+                       | Cmd(b, st) -> Cmd(Block(b), st)
                        )
+                       
+| St st -> St st
 
 
 (* bottom : state *)
 (* let (bottom:state) = fun _ -> raise (UnboundVar "Variabile non trovata.") *)
-let (confl: conf list) = []
 
 
 let rec helper (i:int) (c:conf) : conf list =
