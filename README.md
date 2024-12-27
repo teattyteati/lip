@@ -4,7 +4,14 @@ LiP students are expected to fork the repository and push solutions to the exerc
 
 Invitation to the Discord server: **[https://discord.gg/JKPWbpXBf4](https://discord.gg/JKPWbpXBf4)**
 
-Refresh your OCaml knowledge with these warm-up exercises:
+
+## ⚠️⚙️ 2024 Project
+
+Examples and (very soon) unit tests for this year's project **Tiny Rust** are available in the [lip24](lip24/) directory.
+
+## Course outline
+
+### Warm-up exercises
 
 1. [Adder](basics/adder)
 1. [Regexp recognizer](basics/recognizer)
